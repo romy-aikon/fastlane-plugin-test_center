@@ -14,7 +14,7 @@ module TestCenter
           FastlaneCore::UI.user_error!("Error: cannot find xctestrun file '#{@xctestrun_path}'")
         end
         @only_testing = options[:only_testing]
-        @skip_testing = options[:skip_testing]
+        @skip_testing = options[:skip_testing] || suppressed_tests(options)
       end
 
       def default_derived_data_path(options)
@@ -69,6 +69,19 @@ module TestCenter
           end
         end
         @testables_tests
+      end
+
+      def suppressed_tests(options)
+        return nil unless options[:xcodeproj]
+
+        config = FastlaneCore::Configuration.create(
+          Fastlane::Actions::SuppressedTestsAction.available_options,
+          {
+            xcodeproj: options[:xcodeproj],
+            collated_report: option[:scheme]
+          }
+        )
+        Fastlane::Actions::SuppressedTestsAction.run(config)
       end
     end
   end
