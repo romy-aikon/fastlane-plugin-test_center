@@ -4,10 +4,9 @@ module Fastlane
       require 'set'
 
       def self.run(params)
-        project_path = params[:xcodeproj]
         scheme = params[:scheme]
 
-        scheme_filepaths = Dir.glob("#{project_path}/{xcshareddata,xcuserdata}/**/xcschemes/#{scheme || '*'}.xcscheme")
+        scheme_filepaths = schemes_from_project(params[:xcodeproj]) || schemes_from_workspace(params[:xcodeworkspace])
         if scheme_filepaths.length.zero?
           UI.user_error!("Error: cannot find any scheme named #{scheme}") unless scheme.nil?
           UI.user_error!("Error: cannot find any schemes in the Xcode project")
@@ -27,6 +26,18 @@ module Fastlane
           end
         end
         skipped_tests.to_a
+      end
+
+      def self.schemes_from_project(project_path)
+        Dir.glob("#{project_path}/{xcshareddata,xcuserdata}/**/xcschemes/#{scheme || '*'}.xcscheme")
+      end
+
+      def self.schemes_from_workspace(workspace_path)
+        xcworkspace = Xcodeproj::Workspace.new(workspace_path)
+        scheme_filepaths = []
+        xcworkspace.file_references.each do |fire_reference|
+          scheme_filepaths << schemes_from_project(file_reference.absolute_path(workspace_path))
+        end
       end
 
       #####################################################
