@@ -10,3 +10,11 @@ lane :run_examples do
     # rubocop:enable Security/Eval
   end
 end
+
+lane :test_suppressed_tests do
+  tests = suppressed_tests(
+    workspace: File.absolute_path('../AtomicBoy/AtomicBoy.xcworkspace'),
+    scheme: 'AtomicBoy'
+  )
+  UI.message("tests: #{tests}")
+end
