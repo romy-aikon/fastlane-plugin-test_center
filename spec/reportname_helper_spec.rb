@@ -16,7 +16,7 @@ describe TestCenter do
           output_files: 'report.xml'
         )
       end
-      it 'provides the correct scan options when given  :output_types, :output_files, and :custom_report_file_name' do
+      it 'provides the correct scan options when given :output_types, :output_files, and :custom_report_file_name' do
         helper = ReportNameHelper.new('junit', 'report.junit', 'report.xml')
         expect(helper.scan_options).to include(
           output_types: 'junit',
