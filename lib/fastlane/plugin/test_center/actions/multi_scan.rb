@@ -144,6 +144,14 @@ module Fastlane
             end
           ),
           FastlaneCore::ConfigItem.new(
+            key: :xcpretty_json_file,
+            env_name: "XCPRETTY_JSON_FILE_OUTPUT",
+            description: 'A file path to the xcpretty json file to write. If given, will send \'xcpretty-json-formatter\' to the :scan action',
+            optional: true,
+            is_string: true,
+            default_value: nil
+          ),
+          FastlaneCore::ConfigItem.new(
             key: :testrun_completed_block,
             description: 'A block invoked each time a test run completes',
             optional: true,
@@ -286,6 +294,19 @@ module Fastlane
             workspace: File.absolute_path('../AtomicBoy/AtomicBoy.xcworkspace'),
             scheme: 'AtomicBoy',
             try_count: 3,
+            only_testing: ['AtomicBoyTests']
+          )
+          ",
+          "
+          UI.important(
+            'example: ' \\
+            'multi_scan also works with xcpretty-json-formatter.'
+          )
+          multi_scan(
+            workspace: File.absolute_path('../AtomicBoy/AtomicBoy.xcworkspace'),
+            scheme: 'AtomicBoy',
+            try_count: 3,
+            formatter: 'xcpretty-json-formatter',
             only_testing: ['AtomicBoyTests']
           )
           "
