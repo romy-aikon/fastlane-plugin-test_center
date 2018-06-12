@@ -118,7 +118,7 @@ module Fastlane
       end
 
       def self.scan_options
-        ScanAction.available_options
+        ScanAction.available_options.reject { |config| config.key == :output_types }
       end
 
       def self.available_options
@@ -144,12 +144,11 @@ module Fastlane
             end
           ),
           FastlaneCore::ConfigItem.new(
-            key: :xcpretty_json_file,
-            env_name: "XCPRETTY_JSON_FILE_OUTPUT",
-            description: 'A file path to the xcpretty json file to write. If given, will send \'xcpretty-json-formatter\' to the :scan action',
-            optional: true,
-            is_string: true,
-            default_value: nil
+            key: :output_types,
+            short_option: "-f",
+            env_name: "SCAN_OUTPUT_TYPES",
+            description: "Comma separated list of the output types (e.g. html, junit, json, json-compilation-database)",
+            default_value: "html,junit"
           ),
           FastlaneCore::ConfigItem.new(
             key: :testrun_completed_block,
