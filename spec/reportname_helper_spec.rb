@@ -143,6 +143,13 @@ describe TestCenter do
         helper.increment
         expect(helper.junit_last_reportname).to eq('report-2.xml')
       end
+
+      it 'provides the last reportname for each iteration when specifying json as an output_type' do
+        helper = ReportNameHelper.new('junit,json', 'report.xml,report.json')
+        expect(helper.json_last_reportname).to eq('report.json')
+        helper.increment
+        expect(helper.json_last_reportname).to eq('report-2.json')
+      end
     end
   end
 end

@@ -107,6 +107,32 @@ module TestCenter
         "#{File.basename(html_reportname, '.*')}-[1-9]*#{html_filextension}"
       end
 
+      def includes_json?
+        @output_types.split(',').find_index('json') != nil
+      end
+
+      def json_last_reportname
+        json_index = @output_types.split(',').find_index('json')
+        numbered_filename(@output_files.to_s.split(',')[json_index])
+      end
+
+      def json_reportname
+        json_index = @output_types.split(',').find_index('json')
+        @output_files.to_s.split(',')[json_index]
+      end
+
+      def json_filextension
+        File.extname(json_reportname)
+      end
+
+      def json_fileglob
+        "#{File.basename(json_reportname, '.*')}*#{json_filextension}"
+      end
+
+      def json_numbered_fileglob
+        "#{File.basename(json_reportname, '.*')}-[1-9]*#{json_filextension}"
+      end
+
       def increment
         @report_count += 1
       end
