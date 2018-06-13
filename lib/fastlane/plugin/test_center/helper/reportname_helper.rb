@@ -1,8 +1,7 @@
 module TestCenter
   module Helper
     require 'fastlane_core/ui/ui.rb'
-    require 'pry-byebug'
-    
+
     class ReportNameHelper
       attr_reader :report_count
 
@@ -40,22 +39,24 @@ module TestCenter
       end
 
       def scan_options
-        byebug if @output_types.include?('json')
+        options = {}
+
+        types = @output_types.split(',').each(&:chomp)
         files = @output_files.split(',').each(&:chomp)
+        if (json_index = types.find_index('json'))
+          options[:formatter] = 'xcpretty-json-formatter'
+          files.delete_at(json_index)
+          types.delete_at(json_index)
+        end
         files.map! do |filename|
           filename.chomp
           numbered_filename(filename)
         end
-        types = @output_types.split(',').each(&:chomp).select { |type| %w(junit html json-compilation-database).include?(type)  }
 
-        options = {
+        options.merge(
           output_types: types.join(','),
           output_files: files.join(',')
-        }
-        if types.include?('json')
-          options[:formatter] = 'xcpretty-json-formatter'
-        end
-        options
+        )
       end
 
       def junit_last_reportname

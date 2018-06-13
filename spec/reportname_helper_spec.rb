@@ -55,7 +55,7 @@ describe TestCenter do
         helper = ReportNameHelper.new('json', nil, 'report.json')
         expect(helper.scan_options).to include(
           output_types: 'junit',
-          output_files: 'report.junit',
+          output_files: 'report.xml',
           formatter: 'xcpretty-json-formatter'
         )
       end
