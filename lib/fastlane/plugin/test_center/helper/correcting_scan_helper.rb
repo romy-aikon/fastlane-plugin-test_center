@@ -26,6 +26,8 @@ module TestCenter
             custom_report_file_name
             fail_build
             testrun_completed_block
+            output_types
+            output_files
           ].include?(option)
         end
         @scan_options[:clean] = false
@@ -131,6 +133,7 @@ module TestCenter
         scan_options = @scan_options.merge(scan_run_options)
         try_count = 0
         tests_passed = true
+        xcpretty_json_file_output = ENV['XCPRETTY_JSON_FILE_OUTPUT']
         begin
           try_count += 1
           config = FastlaneCore::Configuration.create(
@@ -138,6 +141,12 @@ module TestCenter
             scan_options.merge(reportnamer.scan_options)
           )
           quit_simulators
+          if reportnamer.includes_json?
+            ENV['XCPRETTY_JSON_FILE_OUTPUT'] = File.join(
+              scan_options[:output_directory],
+              reportnamer.json_numbered_fileglob
+            )
+          end
           Fastlane::Actions::ScanAction.run(config)
           @testrun_completed_block && @testrun_completed_block.call(
             testrun_info(batch, try_count, reportnamer, scan_options[:output_directory])
@@ -164,6 +173,8 @@ module TestCenter
             retry
           end
           tests_passed = false
+        ensure
+          ENV['XCPRETTY_JSON_FILE_OUTPUT'] = xcpretty_json_file_output
         end
         tests_passed
       end

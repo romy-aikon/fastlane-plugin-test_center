@@ -21,7 +21,7 @@ lane :json do
     workspace: File.absolute_path('../AtomicBoy/AtomicBoy.xcworkspace'),
     scheme: 'AtomicBoy',
     try_count: 3,
-    formatter: 'xcpretty-json-formatter',
+    output_types: 'json',
     only_testing: ['AtomicBoyTests']
   )
 end

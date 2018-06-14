@@ -522,6 +522,13 @@ describe TestCenter do
         end
         describe 'one testable' do
           describe 'no batches' do
+            before(:all) do
+              @xcpretty_json_file_output = ENV['XCPRETTY_JSON_FILE_OUTPUT']
+            end
+            after(:all) do
+              ENV['XCPRETTY_JSON_FILE_OUTPUT'] = @xcpretty_json_file_output
+            end
+
             before(:each) do
               allow(File).to receive(:exist?).and_call_original
               allow(File).to receive(:exist?).and_return(true)
@@ -725,6 +732,30 @@ describe TestCenter do
               )
               expect(scanner.retry_total_count).to eq(2)
               expect(result).to eq(false)
+            end
+
+            it 'updates the ENV["XCPRETTY_JSON_FILE_OUTPUT"] appropriately when given json' do
+              scanner = CorrectingScanHelper.new(
+                xctestrun: 'path/to/fake.xctestrun',
+                output_directory: '.',
+                try_count: 3,
+                result_bundle: true,
+                scheme: 'AtomicBoy'
+              )
+              allow(File).to receive(:exist?).and_call_original
+              allow(File).to receive(:exist?).with(%r{.*/report(-[23])?.junit}).and_return(true)
+              allow(Fastlane::Actions::TestsFromJunitAction).to receive(:run) do |config|
+                { failed: ['BagOfTests/CoinTossingUITests/testResultIsTails'] }
+              end
+              result = scanner.correcting_scan(
+                {
+                  output_directory: '.',
+                  scheme: 'AtomicBoy'
+                },
+                1,
+                ReportNameHelper.new('json,junit')
+              )
+              expect(ENV['XCPRETTY_JSON_FILE_OUTPUT']).to eq('doggy')
             end
           end
         end

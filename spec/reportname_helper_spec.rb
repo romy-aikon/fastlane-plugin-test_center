@@ -58,6 +58,12 @@ describe TestCenter do
           output_files: 'report.xml',
           formatter: 'xcpretty-json-formatter'
         )
+        helper = ReportNameHelper.new('json')
+        expect(helper.scan_options).to include(
+          output_types: 'junit',
+          output_files: 'report.xml',
+          formatter: 'xcpretty-json-formatter'
+        )
       end
       it 'raises an exception when given multiple :output_types and only one :custom_report_file_name' do
         expect { ReportNameHelper.new('html,junit', nil, 'report.xml') }.to(
