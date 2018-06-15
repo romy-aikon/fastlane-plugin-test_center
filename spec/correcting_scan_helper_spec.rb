@@ -747,7 +747,10 @@ describe TestCenter do
               allow(Fastlane::Actions::TestsFromJunitAction).to receive(:run) do |config|
                 { failed: ['BagOfTests/CoinTossingUITests/testResultIsTails'] }
               end
-              result = scanner.correcting_scan(
+              allow(Fastlane::Actions::ScanAction).to receive(:run)
+              expect(ENV).to receive(:[]=).with('XCPRETTY_JSON_FILE_OUTPUT', './report.json').ordered.once
+              expect(ENV).to receive(:[]=).with('XCPRETTY_JSON_FILE_OUTPUT', nil).ordered.once
+              scanner.correcting_scan(
                 {
                   output_directory: '.',
                   scheme: 'AtomicBoy'
@@ -755,7 +758,6 @@ describe TestCenter do
                 1,
                 ReportNameHelper.new('json,junit')
               )
-              expect(ENV['XCPRETTY_JSON_FILE_OUTPUT']).to eq('doggy')
             end
           end
         end

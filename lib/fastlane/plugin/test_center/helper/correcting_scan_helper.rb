@@ -144,7 +144,7 @@ module TestCenter
           if reportnamer.includes_json?
             ENV['XCPRETTY_JSON_FILE_OUTPUT'] = File.join(
               scan_options[:output_directory],
-              reportnamer.json_numbered_fileglob
+              reportnamer.json_last_reportname
             )
           end
           Fastlane::Actions::ScanAction.run(config)
