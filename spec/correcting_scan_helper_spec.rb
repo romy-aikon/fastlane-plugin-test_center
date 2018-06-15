@@ -759,6 +759,23 @@ describe TestCenter do
                 ReportNameHelper.new('json,junit')
               )
             end
+
+            it 'collates json files when given json in :output_types' do
+              scanner = CorrectingScanHelper.new(
+                xctestrun: 'path/to/fake.xctestrun',
+                output_directory: '.',
+                try_count: 3,
+                result_bundle: true,
+                scheme: 'AtomicBoy'
+              )
+              allow(FileUtils).to receive(:rm_f)
+              allow(Dir).to receive(:glob).with(/.*\.junit/).and_return(['report.junit', 'report-2.junit'])
+              allow(File).to receive(:mtime).and_return(0)
+              expect(Fastlane::Actions::CollateJunitReportsAction).to receive(:run)
+              expect(Fastlane::Actions::CollateHtmlReportsAction).not_to receive(:run)
+              
+              scanner.collate_reports('.', ReportNameHelper.new('json,junit'))
+            end
           end
         end
       end
