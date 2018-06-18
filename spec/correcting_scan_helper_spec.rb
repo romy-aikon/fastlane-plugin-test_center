@@ -722,6 +722,7 @@ describe TestCenter do
                 expect(expected_fileutils_mv_params[:src]).to eq(src)
                 expect(expected_fileutils_mv_params[:dest]).to eq(dest)
               end.twice
+              expect(scanner).not_to receive(:collate_json_reports)
               result = scanner.correcting_scan(
                 {
                   output_directory: '.',
@@ -773,8 +774,27 @@ describe TestCenter do
               allow(File).to receive(:mtime).and_return(0)
               expect(Fastlane::Actions::CollateJunitReportsAction).to receive(:run)
               expect(Fastlane::Actions::CollateHtmlReportsAction).not_to receive(:run)
-              
+              expect(scanner).to receive(:collate_json_reports)
               scanner.collate_reports('.', ReportNameHelper.new('json,junit'))
+            end
+
+            it 'json collation works correctly' do
+              scanner = CorrectingScanHelper.new(
+                xctestrun: 'path/to/fake.xctestrun',
+                output_directory: '.',
+                try_count: 3,
+                result_bundle: true,
+                scheme: 'AtomicBoy'
+              )
+              allow(Dir).to receive(:glob).with(/.*\.json/).and_return(['report.json', 'report-2.json'])
+              report_1 = File.read('./spec/fixtures/report.json')
+              report_2 = File.read('./spec/fixtures/report-2.json')
+              allow(File).to receive(:mtime).with('./report.json').and_return(0)
+              allow(File).to receive(:mtime).with('./report-2.json').and_return(1)
+              allow(File).to receive(:read).with('./report.json').and_return(report_1)
+              allow(File).to receive(:read).with('./report-2.json').and_return(report_2)
+              reportnamer = ReportNameHelper.new('json,junit')
+              scanner.collate_json_reports('.', reportnamer)
             end
           end
         end
