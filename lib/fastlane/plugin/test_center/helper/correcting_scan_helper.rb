@@ -112,7 +112,7 @@ module TestCenter
         end
         if report_files.size > 1
           collated_report_json = {}
-          report_files.sort!{ |f1, f2| File.mtime(f1) <=> File.mtime(f2) }
+          report_files.sort! { |f1, f2| File.mtime(f1) <=> File.mtime(f2) }
           report_files.each do |report_file|
             json_file = File.read(report_file)
             report_json = JSON.parse(json_file)
@@ -122,8 +122,8 @@ module TestCenter
             f.write(collated_report_json.to_json)
           end
         end
-        retried_html_reportfiles = Dir.glob("#{output_directory}/#{reportnamer.html_numbered_fileglob}")
-        FileUtils.rm_f(retried_html_reportfiles)
+        retried_json_reportfiles = Dir.glob("#{output_directory}/#{reportnamer.json_numbered_fileglob}")
+        FileUtils.rm_f(retried_json_reportfiles)
       end
 
       def collate_html_reports(output_directory, reportnamer)

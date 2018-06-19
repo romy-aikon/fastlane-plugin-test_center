@@ -1,3 +1,5 @@
+require 'pry-byebug'
+require 'json'
 CorrectingScanHelper = TestCenter::Helper::CorrectingScanHelper
 describe TestCenter do
   describe TestCenter::Helper do
@@ -786,15 +788,25 @@ describe TestCenter do
                 result_bundle: true,
                 scheme: 'AtomicBoy'
               )
+
               allow(Dir).to receive(:glob).with(/.*\.json/).and_return(['report.json', 'report-2.json'])
               report_1 = File.read('./spec/fixtures/report.json')
               report_2 = File.read('./spec/fixtures/report-2.json')
-              allow(File).to receive(:mtime).with('./report.json').and_return(0)
-              allow(File).to receive(:mtime).with('./report-2.json').and_return(1)
-              allow(File).to receive(:read).with('./report.json').and_return(report_1)
-              allow(File).to receive(:read).with('./report-2.json').and_return(report_2)
+              final_report = File.read('./spec/fixtures/final-report.json')
+              allow(File).to receive(:mtime).with(/.*report\.json/).and_return(0)
+              allow(File).to receive(:mtime).with(/.*report-2\.json/).and_return(1)
+              allow(File).to receive(:read).and_call_original
+              allow(File).to receive(:read).with(/.*report\.json/).and_return(report_1)
+              allow(File).to receive(:read).with(/.*report-2\.json/).and_return(report_2)
+              mock_final_report = StringIO.new
+              allow(File).to receive(:open).and_call_original
+              allow(File).to receive(:open).with(/.*report\.json/, 'w').and_yield(mock_final_report)
               reportnamer = ReportNameHelper.new('json,junit')
               scanner.collate_json_reports('.', reportnamer)
+
+              actual_json = JSON.parse(mock_final_report.string)
+              expected_json = JSON.parse(final_report)
+              expect(actual_json).to eq(expected_json)
             end
           end
         end
