@@ -76,6 +76,8 @@ module Fastlane
           batch_count
           testrun_completed_block
           test_without_building
+          output_types
+          output_files
         ]
         config = FastlaneCore::Configuration.create(
           Fastlane::Actions::ScanAction.available_options,

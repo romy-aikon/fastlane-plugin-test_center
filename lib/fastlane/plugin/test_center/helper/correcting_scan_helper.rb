@@ -3,7 +3,7 @@ module TestCenter
     require 'fastlane_core/ui/ui.rb'
     require 'plist'
     require 'json'
-
+    require 'pry-byebug'
     class CorrectingScanHelper
       attr_reader :retry_total_count
 
@@ -106,20 +106,36 @@ module TestCenter
         end
       end
 
+      def test_count_from_summary(summary)
+        /.*Executed (?<test_count>\d+) test, with / =~ summary
+        test_count
+      end
+
+      def merge_json_report(first_json, second_json)
+        first_summary = first_json['tests_summary_messages'][0]
+        second_summary = second_json['tests_summary_messages'][0]
+        byebug
+        total_test_count = test_count_from_summary(first_summary) + test_count_from_summary(second_summary)
+        first_json.merge!(second_json)
+      end
+
       def collate_json_reports(output_directory, reportnamer)
-        report_files = Dir.glob("#{output_directory}/#{reportnamer.json_fileglob}").map do |relative_filepath|
+        report_filepaths = Dir.glob("#{output_directory}/#{reportnamer.json_fileglob}").map do |relative_filepath|
           File.absolute_path(relative_filepath)
         end
-        if report_files.size > 1
+        if report_filepaths.size > 1
           collated_report_json = {}
-          report_files.sort! { |f1, f2| File.mtime(f1) <=> File.mtime(f2) }
-          report_files.each do |report_file|
+          report_filepaths.sort! { |f1, f2| File.mtime(f1) <=> File.mtime(f2) }
+          base_report_filepath = report_filepaths.shift
+          base_report_file = File.read(base_report_filepath)
+          base_report_json = JSON.parse(base_report_file)
+          report_filepaths.each do |report_file|
             json_file = File.read(report_file)
             report_json = JSON.parse(json_file)
-            collated_report_json.merge!(report_json)
+            merge_json_report(base_report_json, report_json)
           end
-          File.open(report_files[0], 'w') do |f|
-            f.write(collated_report_json.to_json)
+          File.open(report_filepaths[0], 'w') do |f|
+            f.write(base_report_json.to_json)
           end
         end
         retried_json_reportfiles = Dir.glob("#{output_directory}/#{reportnamer.json_numbered_fileglob}")
