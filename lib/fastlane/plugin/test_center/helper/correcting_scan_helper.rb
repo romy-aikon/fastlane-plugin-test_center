@@ -106,16 +106,19 @@ module TestCenter
         end
       end
 
-      def test_count_from_summary(summary)
-        /.*Executed (?<test_count>\d+) test, with / =~ summary
-        test_count
+      def passed_test_count_from_summary(summary)
+        /.*Executed (?<test_count>\d+) test, with (?<test_failures>\d+) failure/ =~ summary
+        test_count.to_i - test_failures.to_i
       end
 
+      def update_passed_test_count_in_summary(json)
+      end
+      
       def merge_json_report(first_json, second_json)
         first_summary = first_json['tests_summary_messages'][0]
         second_summary = second_json['tests_summary_messages'][0]
         byebug
-        total_test_count = test_count_from_summary(first_summary) + test_count_from_summary(second_summary)
+        total_test_count = passed_test_count_from_summary(first_summary) + passed_test_count_from_summary(second_summary)
         first_json.merge!(second_json)
       end
 
@@ -126,17 +129,7 @@ module TestCenter
         if report_filepaths.size > 1
           collated_report_json = {}
           report_filepaths.sort! { |f1, f2| File.mtime(f1) <=> File.mtime(f2) }
-          base_report_filepath = report_filepaths.shift
-          base_report_file = File.read(base_report_filepath)
-          base_report_json = JSON.parse(base_report_file)
-          report_filepaths.each do |report_file|
-            json_file = File.read(report_file)
-            report_json = JSON.parse(json_file)
-            merge_json_report(base_report_json, report_json)
-          end
-          File.open(report_filepaths[0], 'w') do |f|
-            f.write(base_report_json.to_json)
-          end
+          
         end
         retried_json_reportfiles = Dir.glob("#{output_directory}/#{reportnamer.json_numbered_fileglob}")
         FileUtils.rm_f(retried_json_reportfiles)
