@@ -1,5 +1,5 @@
 {
-    "warnings": [],
+    "warnings": ["trust and verify"],
     "ld_warnings": [],
     "compile_warnings": [],
     "errors": [],

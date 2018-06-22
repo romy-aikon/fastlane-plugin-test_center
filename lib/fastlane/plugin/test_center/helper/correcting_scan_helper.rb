@@ -111,25 +111,19 @@ module TestCenter
         test_count.to_i - test_failures.to_i
       end
 
-      def update_passed_test_count_in_summary(json)
-      end
-      
-      def merge_json_report(first_json, second_json)
-        first_summary = first_json['tests_summary_messages'][0]
-        second_summary = second_json['tests_summary_messages'][0]
-        byebug
-        total_test_count = passed_test_count_from_summary(first_summary) + passed_test_count_from_summary(second_summary)
-        first_json.merge!(second_json)
-      end
-
       def collate_json_reports(output_directory, reportnamer)
         report_filepaths = Dir.glob("#{output_directory}/#{reportnamer.json_fileglob}").map do |relative_filepath|
           File.absolute_path(relative_filepath)
         end
         if report_filepaths.size > 1
-          collated_report_json = {}
-          report_filepaths.sort! { |f1, f2| File.mtime(f1) <=> File.mtime(f2) }
-          
+          config = FastlaneCore::Configuration.create(
+            Fastlane::Actions::CollateJsonReportsAction.available_options,
+            {
+              reports: report_files.sort { |f1, f2| File.mtime(f1) <=> File.mtime(f2) },
+              collated_report: File.absolute_path(File.join(output_directory, reportnamer.html_reportname))
+            }
+          )
+          Fastlane::Actions::CollateHtmlReportsAction.run(config)
         end
         retried_json_reportfiles = Dir.glob("#{output_directory}/#{reportnamer.json_numbered_fileglob}")
         FileUtils.rm_f(retried_json_reportfiles)

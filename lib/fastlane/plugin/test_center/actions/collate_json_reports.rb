@@ -11,11 +11,20 @@ module Fastlane
           base_report_json = JSON.parse(File.read(report_filepaths.shift))
           report_filepaths.each do |report_file|
             report_json = JSON.parse(File.read(report_file))
-            base_report_json.merge!(report_json)
+            merge_reports(base_report_json, report_json)
           end
           File.open(params[:collated_report], 'w') do |f|
             f.write(base_report_json.to_json)
           end
+        end
+      end
+
+      def self.merge_reports(base_report, other_report)
+        base_report.keys.each do |key|
+          unless %w(tests_failures tests_summary_messages).include?(key)
+            base_report[key].concat(other_report[key])
+          end
+          base_report["tests_failures"] = other_report["tests_failures"]
         end
       end
 
